@@ -7,9 +7,6 @@ services:
     image: provectuslabs/kafka-ui:latest
     ports:
       - 8080:8080
-    volumes:
-      - /tmp/kafka/secrets/kafka.kafka1.keystore.jks:/etc/kafka/secrets/kafka.zookeeper.keystore.jks
-      - /tmp/kafka/secrets/kafka.zookeeper.truststore.jks:/etc/kafka/secrets/kafka.zookeeper.truststore.jks
     depends_on:
       - zookeeper0
       - kafka0
@@ -23,41 +20,16 @@ services:
       KAFKA_CLUSTERS_0_SCHEMAREGISTRY: http://schemaregistry0:8085
       KAFKA_CLUSTERS_0_KAFKACONNECT_0_NAME: first
       KAFKA_CLUSTERS_0_KAFKACONNECT_0_ADDRESS: http://kafka-connect0:8083
-      KAFKA_CLUSTERS_0_ZOOKEEPER_CLIENTCNXNSOCKET: org.apache.zookeeper.ClientCnxnSocketNetty
-      KAFKA_CLUSTERS_0_ZOOKEEPER_CLIENT_SECURE: 'true'
-      KAFKA_CLUSTERS_0_ZOOKEEPER_SSL_KEYSTORE_LOCATION: /etc/kafka/secrets/kafka.zookeeper.keystore.jks
-      KAFKA_CLUSTERS_0_ZOOKEEPER_SSL_KEYSTORE_PASSWORD: 12345678
-      KAFKA_CLUSTERS_0_ZOOKEEPER_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/kafka.zookeeper.truststore.jks
-      KAFKA_CLUSTERS_0_ZOOKEEPER_SSL_TRUSTSTORE_PASSWORD: 12345678
+      KAFKA_CLUSTERS_0_JMX_USERNAME: test
+      KAFKA_CLUSTERS_0_JMX_PASSWORD: 123
 
   zookeeper0:
     image: confluentinc/cp-zookeeper:5.2.4
-    volumes:
-      - /tmp/kafka/secrets/kafka.kafka1.keystore.jks:/etc/kafka/secrets/kafka.zookeeper.keystore.jks
-      - /tmp/kafka/secrets/kafka.zookeeper.truststore.jks:/etc/kafka/secrets/kafka.zookeeper.truststore.jks
     environment:
-      ZOOKEEPER_CLIENT_PORT: 2182
+      ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
-
-      ZOOKEEPER_SECURE_CLIENT_PORT: 2182
-      ZOOKEEPER_SERVER_CNXN_FACTORY: org.apache.zookeeper.server.NettyServerCnxnFactory
-      ZOOKEEPER_SSL_KEYSTORE_LOCATION: /etc/kafka/secrets/kafka.zookeeper.keystore.jks
-      ZOOKEEPER_SSL_KEYSTORE_PASSWORD: 12345678
-      ZOOKEEPER_SSL_KEYSTORE_TYPE: PKCS12
-      ZOOKEEPER_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/kafka.zookeeper.truststore.jks
-      ZOOKEEPER_SSL_TRUSTSTORE_PASSWORD: 12345678
-      ZOOKEEPER_SSL_TRUSTSTORE_TYPE: JKS
-      # TLS 1.2 is the tested-default - TLS 1.3 has not been tested for production
-      # You can evaluate TLS 1.3 for ZooKeeper by uncommenting the following two properties
-      # and setting KAFKA_ZOOKEEPER_SSL_PROTOCOL on brokers
-      ZOOKEEPER_SSL_ENABLED_PROTOCOLS: TLSv1.3,TLSv1.2
-      ZOOKEEPER_SSL_QUORUM_ENABLED_PROTOCOLS: TLSv1.3,TLSv1.2
-      ZOOKEEPER_SSL_CIPHER_SUITES: TLS_AES_256_GCM_SHA384,TLS_CHACHA20_POLY1305_SHA256,TLS_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
-      ZOOKEEPER_SSL_CLIENT_AUTH: need
-      ZOOKEEPER_AUTH_PROVIDER_X509: org.apache.zookeeper.server.auth.X509AuthenticationProvider
-      ZOOKEEPER_AUTH_PROVIDER_SASL: org.apache.zookeeper.server.auth.SASLAuthenticationProvider
     ports:
-      - 2182:2182
+      - 2181:2181
 
   kafka0:
     image: confluentinc/cp-kafka:5.2.4
@@ -66,9 +38,6 @@ services:
     ports:
       - 9092:9092
       - 9997:9997
-    volumes:
-      - /tmp/kafka/secrets/kafka.kafka1.keystore.jks:/etc/kafka/secrets/kafka.kafka1.keystore.jks
-      - /tmp/kafka/secrets/kafka.server.truststore.jks:/etc/kafka/secrets/kafka.kafka1.truststore.jks
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper0:2182
@@ -78,15 +47,6 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       JMX_PORT: 9997
       KAFKA_JMX_OPTS: -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=kafka0 -Dcom.sun.management.jmxremote.rmi.port=9997
-      KAFKA_ZOOKEEPER_SSL_CLIENT_ENABLE: 'true'
-      KAFKA_ZOOKEEPER_SSL_CIPHER_SUITES: TLS_AES_256_GCM_SHA384,TLS_CHACHA20_POLY1305_SHA256,TLS_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
-      KAFKA_ZOOKEEPER_CLIENT_CNXN_SOCKET: org.apache.zookeeper.ClientCnxnSocketNetty
-      KAFKA_ZOOKEEPER_SSL_KEYSTORE_LOCATION: /etc/kafka/secrets/kafka.kafka1.keystore.jks
-      KAFKA_ZOOKEEPER_SSL_KEYSTORE_PASSWORD: 12345678
-      KAFKA_ZOOKEEPER_SSL_KEYSTORE_TYPE: PKCS12
-      KAFKA_ZOOKEEPER_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/kafka.kafka1.truststore.jks
-      KAFKA_ZOOKEEPER_SSL_TRUSTSTORE_PASSWORD: 12345678
-      KAFKA_ZOOKEEPER_SSL_TRUSTSTORE_TYPE: JKS
 
   schemaregistry0:
     image: confluentinc/cp-schema-registry:5.2.4
